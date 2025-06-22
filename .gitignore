@@ -1,0 +1,72 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+*.egg-info/
+dist/
+build/
+*.egg
+.mypy_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+*.cover
+*.py,cover
+.tox/
+.nox/
+.hypothesis/
+*.whl
+
+# uv-specific
+.uv/
+.uv_cache/
+.uv.lock
+
+# Neovim
+*.swp
+*.swo
+*.un~
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Operating Systems
+.DS_Store
+Thumbs.db
+*.lnk
+
+# Logs
+*.log
+logs/
+log/
+
+# Temporary Files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Miscellaneous
+*.cache
+*.dat
+*.out
+*.pid
+*.seed
+*.gz
+*.tgz
+*.zip
+*.7z
+*.rar
