@@ -1,9 +1,20 @@
 from typing import Protocol
 
+from src.color import Color
+
+
 class Positionable(Protocol):
-    @property
-    def x(self) -> int: ...
+    x: int
+    y: int
 
-    @property
-    def y(self) -> int: ...
 
+class Drawable(Positionable):
+    color: Color
+
+
+class Player(Drawable):
+    pass
+
+
+class Agent(Protocol):
+    player: Player

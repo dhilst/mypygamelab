@@ -1,29 +1,34 @@
 from typing import Optional, List
+import random
 
 from src.player import Player, Action
 from src.env import GridEnvironment
+from src.mapobjs import Dirty
 
-import random
 
-
-class Agent:
+class BaseAgent:
     def __init__ (self, player: Player):
         self.player = player
 
     def perceive(self, environment: GridEnvironment) -> Optional[Action]:
-        """
-        Perceive the environment and player state to decide an action.
+        return None
 
-        Args:
-            environment (GridEnvironment): The game grid environment
-            player (Player): The player being controlled
+    def act(self, action: Optional[Action], environment: GridEnvironment):
+        if action is not None:
+            self.player.act(action, environment)
 
-        Returns:
-            Optional[int]: A Pygame key constant (e.g., pygame.K_UP) or None if no action
-        """
-        player = self.player
-        # Get valid moves (directions where the player can move)
+class RandomAgent(BaseAgent):
+    def __init__ (self, player: Player):
+        self.player = player
+
+    def perceive(self, environment: GridEnvironment) -> Optional[Action]:
         valid_moves: List[Action] = []
+        player = self.player
+        observed = environment.get_objects_except(player)
+        if observed:
+            if type(observed[-1]) is Dirty:
+                return Action.CLEAN_UP
+        # Get valid moves (directions where the player can move)
         if environment.is_valid_position(player.x, player.y - 1):
             valid_moves.append(Action.MOVE_UP)
         if environment.is_valid_position(player.x, player.y + 1):
@@ -36,6 +41,7 @@ class Agent:
         # Choose a random valid move, or None if no moves are possible
         return random.choice(valid_moves) if valid_moves else None
 
-    def act(self, action: Optional[Action], environment: GridEnvironment):
-        if action is not None:
-            self.player.act(action, environment)
+class RightAgent(BaseAgent):
+    def perceive(self, environment: GridEnvironment) -> Optional[Action]:
+        return Action.MOVE_RIGHT
+

@@ -1,21 +1,15 @@
-from typing import List, Any, Optional
+from typing import List, Any, Optional, Sequence
 
 import pygame 
 
-from src.agent import Agent
-from src.player import Player
 from src.env import GridEnvironment
-from src.color import Color, WHITE, RED, BLACK, BLUE
+from src.agent import BaseAgent 
+from src.color import WHITE, BLACK
+from src import mapobjs, utils
+from src.typedefs import Drawable
 
 class Game:
-    def _add_player(self, x: int, y: int, color: Color):
-        player = Player(x, y, color)
-        agent = Agent(player)
-        self.players.append(player)
-        self.agents.append(agent)
-        self.grid_env.push_obj(player)
-
-    def __init__(self):
+    def __init__(self, agents: Sequence[BaseAgent]):
         # Initialize Pygame
         pygame.init()
 
@@ -32,10 +26,15 @@ class Game:
 
         # Initialize game objects
         self.grid_env = GridEnvironment()
-        self.players = []
         self.agents = []
-        self._add_player(0, 0, RED)
-        self._add_player(5, 5, BLUE)
+        for agent in agents:
+            self._add_agent(agent)
+
+        make_rand_dirty = lambda: mapobjs.Dirty(
+            **utils.random_coord(self.GRID_SIZE, self.GRID_SIZE))
+        for _ in range(0, 30):
+            mapobj = make_rand_dirty()
+            self.grid_env.push_obj(mapobj)
         
         self.running = True
 
@@ -44,6 +43,10 @@ class Game:
         self.agent_interval = 100  # 1000 ms = 1 second
 
         self.screen.fill(WHITE)
+
+    def _add_agent(self, agent: BaseAgent):
+        self.agents.append(agent)
+        self.grid_env.push_obj(agent.player)
 
     def simulate_keypress(self, key: int):
         """
@@ -55,30 +58,32 @@ class Game:
         event = pygame.event.Event(pygame.KEYDOWN, key=key)
         pygame.event.post(event)
 
-    def draw_players(self):
-        for player in self.players:
-            player_rect = pygame.Rect(
-                player.x * self.TILE_SIZE, player.y * self.TILE_SIZE, self.TILE_SIZE, self.TILE_SIZE
-            )
-            pygame.draw.rect(self.screen, player.color, player_rect)
+    def draw_obj(self, obj: Drawable):
+        obj_rect = pygame.Rect(
+            obj.x * self.TILE_SIZE, obj.y * self.TILE_SIZE, self.TILE_SIZE, self.TILE_SIZE
+        )
+        pygame.draw.rect(self.screen, obj.color, obj_rect)
 
     def draw_grid(self):
-        # Draw grid
         for x in range(self.GRID_SIZE):
             for y in range(self.GRID_SIZE):
-                rect = pygame.Rect(x * self.TILE_SIZE, y * self.TILE_SIZE, self.TILE_SIZE, self.TILE_SIZE)
-                pygame.draw.rect(self.screen, BLACK, rect, 1)
+                objs = self.grid_env.get_objects_at(x, y)
+                if objs:
+                    self.draw_obj(objs[-1])
+                else:
+                    rect = pygame.Rect(x * self.TILE_SIZE, y * self.TILE_SIZE, 
+                                       self.TILE_SIZE, self.TILE_SIZE)
+                    pygame.draw.rect(self.screen, BLACK, rect, 1)
 
     def draw(self):
         """Render the game state."""
         
-        # self.screen.fill(WHITE)
+        self.screen.fill(WHITE)
         self.draw_grid()
-        self.draw_players()
 
         pygame.display.flip()
 
-    def run_agent(self, agent: Agent):
+    def run_agent(self, agent: BaseAgent):
         action = agent.perceive(self.grid_env)
         agent.act(action, self.grid_env)
 
@@ -89,7 +94,6 @@ class Game:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
-
 
     def run(self):
         """Main game loop."""

@@ -1,4 +1,4 @@
-from typing import Any, List, Optional
+from typing import Any, Generator, List, Optional
 
 from src.typedefs import Positionable
 
@@ -28,6 +28,16 @@ class GridEnvironment:
             return self.grid[y][x]
         return []
 
+    def remove_obj(self, obj: Positionable):
+        grid = self.grid[obj.y][obj.x]
+        try:
+            idx = grid.index(obj)
+            del grid[idx]
+        except ValueError:
+            pass
+
+    def get_objects_except(self, obj: Positionable) -> List[Any]:
+        return [x for x in self.get_objects_at(obj.x, obj.y) if x is not obj]
 
     def push_obj(self, obj: Positionable) -> bool:
         return self.push(obj.x, obj.y, obj)

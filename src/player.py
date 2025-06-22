@@ -1,13 +1,18 @@
 import enum
 
+from  typing import final
+
+from src.typedefs import Drawable
 from src.env import GridEnvironment
 from src.color import Color
+from src.mapobjs import Dirty
 
 class Action(str, enum.Enum):
     MOVE_UP = enum.auto()
     MOVE_DOWN = enum.auto()
     MOVE_LEFT = enum.auto()
     MOVE_RIGHT = enum.auto()
+    CLEAN_UP = enum.auto()
 
 class Player:
     def __init__(self, x: int, y: int, color: Color):
@@ -24,8 +29,17 @@ class Player:
             return self.move_left(grid_environment)
         elif action == Action.MOVE_RIGHT:
             return self.move_right(grid_environment)
+        elif action == Action.CLEAN_UP:
+            return self.clean_up(grid_environment)
         else:
             raise ValueError(f"Invalid action {action}")
+
+    def clean_up(self, grid_environment: GridEnvironment):
+        x, y = self.x, self.y
+        objs = grid_environment.get_objects_except(self)
+        for obj in objs:
+            if type(obj) is Dirty:
+                grid_environment.remove_obj(obj)
 
     def move_up(self, grid_environment: GridEnvironment) -> bool:
         new_y = self.y - 1
