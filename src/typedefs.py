@@ -11,6 +11,9 @@ class Positionable(Protocol):
 class Drawable(Positionable):
     color: Color
 
+    def draw(self, game): ...
+
+
 
 class Player(Drawable):
     pass

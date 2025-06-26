@@ -1,6 +1,8 @@
 import random
 from typing import TypedDict
 
+from src.typedefs import Positionable
+
 class Coord(TypedDict):
     x: int
     y: int

@@ -9,13 +9,13 @@ from src import mapobjs, utils
 from src.typedefs import Drawable
 
 class Game:
-    def __init__(self, agents: Sequence[BaseAgent]):
+    def __init__(self, agents: Sequence[BaseAgent], nobjs=50):
         # Initialize Pygame
         pygame.init()
 
         # Constants
-        self.GRID_SIZE = 16
-        self.TILE_SIZE = 40
+        self.GRID_SIZE = 32
+        self.TILE_SIZE = 20
         self.WINDOW_SIZE = (self.GRID_SIZE * self.TILE_SIZE, self.GRID_SIZE * self.TILE_SIZE)
         self.FPS = 60
 
@@ -25,16 +25,21 @@ class Game:
         self.clock = pygame.time.Clock()
 
         # Initialize game objects
-        self.grid_env = GridEnvironment()
+        self.grid_env = GridEnvironment(self.GRID_SIZE, self.GRID_SIZE)
         self.agents = []
         for agent in agents:
             self._add_agent(agent)
 
-        make_rand_dirty = lambda: mapobjs.Dirty(
+        make_rand_gold = lambda: mapobjs.Gold(
             **utils.random_coord(self.GRID_SIZE, self.GRID_SIZE))
-        for _ in range(0, 30):
-            mapobj = make_rand_dirty()
+        visited = set()
+        for _ in range(0, nobjs):
+            mapobj = make_rand_gold()
+            while (mapobj.x, mapobj.y) in visited:
+                mapobj = make_rand_gold()
+            visited.add((mapobj.x, mapobj.y))
             self.grid_env.push_obj(mapobj)
+        self.grid_env.push_obj(mapobjs.Dirty(3, 6))
         
         self.running = True
 
@@ -59,10 +64,7 @@ class Game:
         pygame.event.post(event)
 
     def draw_obj(self, obj: Drawable):
-        obj_rect = pygame.Rect(
-            obj.x * self.TILE_SIZE, obj.y * self.TILE_SIZE, self.TILE_SIZE, self.TILE_SIZE
-        )
-        pygame.draw.rect(self.screen, obj.color, obj_rect)
+        obj.draw(self)
 
     def draw_grid(self):
         for x in range(self.GRID_SIZE):

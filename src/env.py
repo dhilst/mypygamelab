@@ -89,3 +89,8 @@ class GridEnvironment:
             return self.grid[y][x][-1]
         return None
 
+    def __iter__(self):
+        for y in range(0, self.height):
+            for x in range(0, self.width):
+                yield x, y, self.grid[y][x]
+
